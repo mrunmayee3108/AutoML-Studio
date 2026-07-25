@@ -3,6 +3,7 @@ import sys
 import pickle
 import pandas as pd
 import numpy as np
+import logging
 from typing import Dict, Any, Tuple
 from sklearn.model_selection import cross_val_score
 
@@ -56,7 +57,7 @@ class ModelComparator:
         else:
             return "High (Ensemble/Boosting)"
 
-    def generate_comparision_report(self, 
+    def generate_comparison_report(self, 
                                     trained_models: Dict[str, Tuple[Any, float]],
                                     leaderboard_df: pd.DataFrame,
                                     X_train: pd.DataFrame,
