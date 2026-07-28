@@ -1,0 +1,27 @@
+{
+    "version_id": "random_forest_classifier_v_20260728_190953",
+    "model_name": "Random Forest Classifier",
+    "task_type": "classification",
+    "timestamp": "20260728_190953",
+    "expected_features": [
+        "Age",
+        "Income",
+        "Credit_Score",
+        "Loan_Amount"
+    ],
+    "class_names": [
+        "Rejected",
+        "Approved"
+    ],
+    "metrics": {
+        "F1_Score": 0.895,
+        "Accuracy": 0.91,
+        "Inference_Latency": "1.2 ms"
+    },
+    "artifact_file": "random_forest_classifier_v_20260728_190953.joblib",
+    "environment_info": {
+        "python_version": "3.13.9",
+        "sklearn_version": "1.8.0",
+        "joblib_version": "1.5.3"
+    }
+}
