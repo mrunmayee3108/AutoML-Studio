@@ -39,7 +39,30 @@ class FeatureEngineer:
             # We scale the data, but maintain the Pandas DataFrame format (sklearn returns numpy arrays by default)
             self.df[numeric_features] = scaler.fit_transform(self.df[numeric_features])
             self.scalers['standard'] = scaler
+            self.scaled_features = numeric_features
             logger.info(f"Applied Standard Scaling to {len(numeric_features)} numerical features.")
+
+    def transform(self, df_new: pd.DataFrame) -> pd.DataFrame:
+        """Applies the fitted encodings and scalings to new data for inference."""
+        df_inf = df_new.copy()
+        # Handle one-hot encoding
+        categorical_features = df_inf.select_dtypes(include=['object', 'category']).columns.tolist()
+        if categorical_features:
+            df_inf = pd.get_dummies(df_inf, columns=categorical_features, drop_first=True)
+            
+        # Align columns to what was seen during training
+        # We need the columns from self.df except target
+        expected_cols = [col for col in self.df.columns if col != self.target_column]
+        for col in expected_cols:
+            if col not in df_inf.columns:
+                df_inf[col] = 0
+        df_inf = df_inf[expected_cols]
+
+        # Apply scaling
+        if 'standard' in self.scalers and hasattr(self, 'scaled_features'):
+            df_inf[self.scaled_features] = self.scalers['standard'].transform(df_inf[self.scaled_features])
+        
+        return df_inf
 
     def get_processed_dataframe(self) -> Tuple[pd.DataFrame, pd.Series]:
         """Separates features (X) and target (y) for model training."""

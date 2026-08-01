@@ -10,6 +10,11 @@ logger = logging.getLogger(__name__)
 class DatabaseManager:
     # handles connections n crud operations for the sqlite db using sqlalchemy sessions.
     def __init__(self, db_path: str="sqlite:///automl.db"):
+        if db_path.startswith("sqlite:///"):
+            db_file = db_path.replace("sqlite:///", "")
+            if os.path.dirname(db_file):
+                os.makedirs(os.path.dirname(db_file), exist_ok=True)
+                
         self.engine = create_engine(db_path, connect_args={"check_same_thread":False})
         Base.metadata.create_all(self.engine)
         self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)

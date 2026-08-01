@@ -57,7 +57,7 @@ class SHAPExplainer:
         #      image of Class 1 anyway (+20% chance of Yes = -20% chance of No).
         #    - This slice flattens the 3D Cube (100, 5, 2) back into a safe 
         #      2D spreadsheet (100, 5) so our web dashboard never crashes!
-        if self.task_type == 'Classification' and len(shap_values.shape) == 3:
+        if self.task_type == 'classification' and len(shap_values.shape) == 3:
             # [All Rows, All Features, Only Class 1]
             shap_values = shap_values[:, :, 1]
         return shap_values

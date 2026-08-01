@@ -41,12 +41,11 @@ class EDAAnalyzer:
             return fig
         corr = numeric_df.corr()
         # creating a mask to hide the upper triangle, since its redundant.
-        mask = np.triu(np.ones_vars(corr.shape), k=1).astype(bool)
+        mask = np.triu(np.ones(corr.shape), k=1).astype(bool)
         
-        sns.heatmap(corr, mask=mask, annot=True, fmt=".2f", cmap="collwarm", vmax=1, vmin=-1, center=0, square=True, linewidths=.5, ax=ax)
+        sns.heatmap(corr, mask=mask, annot=True, fmt=".2f", cmap="coolwarm", vmax=1, vmin=-1, center=0, square=True, linewidths=.5, ax=ax)
         ax.set_title("Feature Correlation Heatmap", fontsize=14, fontweight='bold')
         plt.tight_layout()
         plt.close(fig)
         logger.info("Generated correlation heatmap")
         return fig
-    

@@ -16,7 +16,7 @@ def main():
     st.markdown("""
     ### Welcome to the MLOps Dashboard
     This platform automatically analyzes datasets, trains multiple machine learning models, 
-    tracks experiments, and serves the best models via a highly scalable REST API.
+    tracks experiments, and serves the best models natively within Streamlit.
 
     **Navigation:**
     * 📊 **History:** View past experiments, performance metrics, and model leaderboards.
@@ -25,7 +25,7 @@ def main():
     *Developed as a production-grade demonstration of MLOps, Explainable AI, and Software Engineering.*
     """)
     
-    st.info("Backend Systems Online: FastAPI connected to SQLite & Joblib Artifact Store.")
+    st.info("Backend Systems Online: Streamlit connected natively to SQLite & Joblib Artifact Store.")
 
 if __name__ == "__main__":
     main()

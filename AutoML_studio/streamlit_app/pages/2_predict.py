@@ -2,21 +2,27 @@ import streamlit as st
 import requests
 import json
 
-st.set_page_config(page_title="Real-time Prediction", page_icon="🔮", layout="wide")
+import sys
+import os
 
-API_URL = "http://127.0.0.1:8000"
+# Add root directory to sys.path so we can import from src
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+if root_dir not in sys.path:
+    sys.path.insert(0, root_dir)
+
+from src.persistence.manager import ModelPersistenceManager
+from src.prediction.predictor import ModelPredictor
+
+st.set_page_config(page_title="Real-time Prediction", page_icon="🔮", layout="wide")
 
 st.title("Real-time Prediction Engine")
 st.markdown("Select a deployed model and input feature values to generate predictions.")
 
-# 1. Fetch available models
-@st.cache_data(ttl=30)
+persister = ModelPersistenceManager(base_directory=os.path.join(root_dir, "saved_models"))
+
 def fetch_models():
     try:
-        response = requests.get(f"{API_URL}/models", timeout=5)
-        if response.status_code == 200:
-            return response.json().get("models", [])
-        return []
+        return persister.list_saved_models()
     except:
         return []
 
@@ -44,16 +50,20 @@ else:
         try:
             features_dict = json.loads(user_input)
             
-            with st.spinner("Querying Inference API..."):
-                payload = {
-                    "version_id": selected_version,
-                    "features": features_dict
-                }
-                
-                res = requests.post(f"{API_URL}/predict", json=payload)
-                
-                if res.status_code == 200:
-                    result_data = res.json()[0]
+            with st.spinner("Loading Model & Predicting..."):
+                try:
+                    loaded_model, loaded_prep, metadata = persister.load_pipeline(selected_version)
+                    predictor = ModelPredictor(
+                        model=loaded_model,
+                        task_type=metadata["task_type"],
+                        expected_features=metadata["expected_features"],
+                        class_names=metadata.get("class_names"),
+                        preprocessor=loaded_prep
+                    )
+                    
+                    results = predictor.predict(features_dict)
+                    result_data = results[0]
+                    
                     st.success("Inference Completed Successfully!")
                     
                     col1, col2, col3 = st.columns(3)
@@ -62,10 +72,10 @@ else:
                     col3.metric("Task Type", result_data.get("task_type"))
                     
                     st.json(result_data)
-                else:
-                    st.error(f"API Error: {res.json().get('detail')}")
+                except ValueError as ve:
+                    st.error(f"Input Error: {str(ve)}")
+                except Exception as e:
+                    st.error(f"Inference Error: {str(e)}")
                     
         except json.JSONDecodeError:
             st.error("Invalid JSON format. Please check your syntax.")
-        except requests.exceptions.ConnectionError:
-            st.error("Could not connect to FastAPI server. Ensure it is running on port 8000.")

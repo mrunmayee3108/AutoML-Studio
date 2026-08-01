@@ -2,21 +2,28 @@ import streamlit as st
 import requests
 import pandas as pd
 
-st.set_page_config(page_title="Experiment History", page_icon="📊", layout="wide")
+import sys
+import os
 
-API_URL = "http://127.0.0.1:8000"
+# Add root directory to sys.path so we can import from src
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+if root_dir not in sys.path:
+    sys.path.insert(0, root_dir)
+
+from src.database.manager import DatabaseManager
+
+st.set_page_config(page_title="Experiment History", page_icon="📊", layout="wide")
 
 st.title("Experiment History")
 st.markdown("View all tracked AutoML training runs, model metadata, and artifacts.")
 
-@st.cache_data(ttl=10) 
 def fetch_experiments():
     try:
-        response = requests.get(f"{API_URL}/experiments", timeout=5)
-        response.raise_for_status()
-        return response.json()
+        db_path = f"sqlite:///{os.path.join(root_dir, 'database', 'automl.db')}"
+        db = DatabaseManager(db_path=db_path)
+        return db.get_all_experiments()
     except Exception as e:
-        st.error(f"Failed to connect to backend API: {str(e)}")
+        st.error(f"Failed to fetch from Database: {str(e)}")
         return []
 
 experiments = fetch_experiments()
